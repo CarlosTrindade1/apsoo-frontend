@@ -1,5 +1,9 @@
+import Navbar from "./nav-bar";
+
 export default function Dashboard() {
-    return (
-        <h1>Hello from Dashboard!</h1>
-    );
+	return (
+		<div>
+			<Navbar/>
+		</div>
+	)
 }
