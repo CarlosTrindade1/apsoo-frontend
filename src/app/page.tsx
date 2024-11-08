@@ -71,6 +71,9 @@ export default function Home() {
             <Link href="/signup" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
               Criar uma conta
             </Link>
+            <Link href="/dashboard">
+              teste
+            </Link>
           </p>
         </div>
       </div>

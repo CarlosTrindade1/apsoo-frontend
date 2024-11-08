@@ -1,9 +1,9 @@
-import Navbar from "../dashboard/nav-bar";
+import { Navbar } from "../dashboard/nav-bar";
 
-export default function Despensa() {
+export default function Despensas() {
   return (
     <div>
-      <Navbar path="despensas"/>
+      <Navbar/>
     </div>
   )
 }
