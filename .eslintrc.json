@@ -1,3 +1,41 @@
 {
-  "extends": ["next/core-web-vitals", "next/typescript"]
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module",
+    "project": "./tsconfig.json"
+  },
+  "extends": [
+    "next/core-web-vitals",
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:jsx-a11y/recommended",
+    "next/typescript"
+  ],
+  "plugins": [
+    "react",
+    "@typescript-eslint",
+    "jsx-a11y"
+  ],
+  "rules": {
+    // Aqui você pode adicionar ou sobrescrever regras conforme necessário.
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "react/react-in-jsx-scope": "off", // No Next.js não precisamos disso por padrão.
+    "react/jsx-uses-react": "off", // Também não necessário com o Next.js
+    "react/prop-types": "off", // Next.js + TypeScript não usa PropTypes
+    "jsx-a11y/anchor-is-valid": [
+      "warn",
+      {
+        "components": ["Link"],
+        "specialLink": ["hrefLeft", "hrefRight"]
+      }
+    ]
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  }
 }
