@@ -4,7 +4,7 @@ import { Navbar } from "../dashboard/nav-bar";
 export default function Mercados() {
   return (
     <div>
-      <Navbar/>
+      <Navbar route="mercados"/>
     </div>
   )
 }
