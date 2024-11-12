@@ -1,8 +1,8 @@
-import FooterApp from '../dashboard/footer';
-import Grid from '../dashboard/grid';
-import Header from '../dashboard/header';
-import { Navbar } from '../dashboard/nav-bar';
-import styles from '../dashboard/styles/Grid.module.css';
+import FooterApp from '../components/footer';
+import Grid from '../components/grid';
+import Header from '../components/header';
+import { Navbar } from '../components/nav-bar';
+import styles from '../components/styles/Grid.module.css';
 
 export default function Mercados() {
   return (

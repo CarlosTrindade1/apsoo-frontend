@@ -1,8 +1,8 @@
-import FooterApp from "./footer";
-import Grid from "./grid";
-import Header from "./header";
-import { Navbar } from "./nav-bar";
-import styles from './styles/Grid.module.css'
+import FooterApp from '../components/footer';
+import Grid from '../components/grid';
+import Header from '../components/header';
+import { Navbar } from '../components/nav-bar';
+import styles from '../components/styles/Grid.module.css';
 
 export default function Dashboard() {
 	return (
