@@ -21,3 +21,8 @@
 .header {
     grid-area: header;
 }
+
+.content {
+    grid-area: content;
+    padding: 20px;
+}
