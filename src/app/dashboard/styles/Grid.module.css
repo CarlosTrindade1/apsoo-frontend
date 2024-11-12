@@ -1,7 +1,7 @@
 .grid {
     display: grid;
     grid-template-columns: 16rem auto;
-    grid-template-rows: 100px auto 100px;
+    grid-template-rows: 100px auto 80px;
     grid-template-areas: 
         'nav header' 
         'nav content' 
@@ -16,4 +16,8 @@
 
 .footer {
     grid-area: footer;
+}
+
+.header {
+    grid-area: header;
 }
