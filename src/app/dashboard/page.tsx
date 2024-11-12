@@ -7,7 +7,7 @@ export default function Dashboard() {
 	return (
 		<Grid>
 			<Navbar route="dashboard" className={styles.navbar}/>
-			<FooterApp />
+			<FooterApp className={styles.footer}/>
 		</Grid>
 	)
 }
