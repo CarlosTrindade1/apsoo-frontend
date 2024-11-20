@@ -63,6 +63,9 @@ export default function Mercados() {
                   <Table.HeadCell>
                     <span className="sr-only">Editar</span>
                   </Table.HeadCell>
+                  <Table.HeadCell>
+                    <span className="sr-only">Excluir</span>
+                  </Table.HeadCell>
                 </Table.Head>
                 <Table.Body className="divide-y">
                   {mercados.map((mercado) => {
@@ -77,6 +80,11 @@ export default function Mercados() {
                         <Table.Cell>
                           <a href="#" className="font-medium text-cyan-600 hover:underline dark:text-cyan-500">
                             Editar
+                          </a>
+                        </Table.Cell>
+                        <Table.Cell>
+                          <a href="#" className="font-medium text-red-600 hover:underline dark:text-cyan-500">
+                            Excluir
                           </a>
                         </Table.Cell>
                       </Table.Row>
