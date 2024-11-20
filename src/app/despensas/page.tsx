@@ -10,6 +10,7 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { BACKEND_URL } from '../constants';
 import { IDespensaDTO, IDespensaItensDTO } from './interfaces/IDespensaDTO';
+import ButtonAdder from '../components/button-adder';
 
 type DataModal = {
   despensa: IDespensaDTO;
@@ -185,6 +186,7 @@ export default function Despensas() {
             <Button onClick={() => setOpenModal(false)}>Adicionar item</Button>
           </Modal.Footer>
         </Modal>
+        <ButtonAdder content="Adicionar despensa"/>
       </div>
       <FooterApp className={styles.footer}/>
     </Grid>
