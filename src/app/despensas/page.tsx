@@ -50,10 +50,12 @@ export default function Despensas() {
   }
 
   useEffect(() => {
-    fetchDespensas().then((data) => {
-      setDespensas(data);
-    });
-  }, []);
+    if (despensas.length === 0) {
+      fetchDespensas().then((data) => {
+        setDespensas(data);
+      });
+    }
+  }, [despensas]);
 
   return (
     <Grid>
