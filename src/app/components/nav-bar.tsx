@@ -2,6 +2,7 @@
 
 import { CustomFlowbiteTheme, DarkThemeToggle, Flowbite, Sidebar } from 'flowbite-react';
 import { HiChartPie, HiShoppingBag} from 'react-icons/hi';
+import { BiFoodMenu } from 'react-icons/bi';
 import { IoCartOutline, IoLogOutOutline } from "react-icons/io5";
 
 type NavbarProps = {
@@ -35,6 +36,9 @@ export function Navbar(props: NavbarProps) {
               </Sidebar.Item>
               <Sidebar.Item href="/mercados" className={`${route == 'mercados' ? 'bg-gray-100 dark:bg-gray-700' : ''}`} icon={IoCartOutline}>
                 Mercados
+              </Sidebar.Item>
+              <Sidebar.Item href="/produtos" className={`${route == 'produtos' ? 'bg-gray-100 dark:bg-gray-700' : ''}`} icon={BiFoodMenu}>
+                Produtos
               </Sidebar.Item>
               <Sidebar.Item href="/" icon={IoLogOutOutline}>
                 Sair

@@ -92,10 +92,10 @@ export default function Mercados() {
                   })}
                 </Table.Body>
               </Table>
+              <ButtonAdder content="Adicionar mercado"/>
             </div>
           )
         }
-        <ButtonAdder content="Adicionar mercado"/>
       </div>
       <FooterApp className={styles.footer}/>
     </Grid>

@@ -141,6 +141,7 @@ export default function Despensas() {
                   </Card>
                 )
               })}
+              <ButtonAdder content="Adicionar despensa"/>
             </div>
           )
         }
@@ -186,7 +187,6 @@ export default function Despensas() {
             <Button onClick={() => setOpenModal(false)}>Adicionar item</Button>
           </Modal.Footer>
         </Modal>
-        <ButtonAdder content="Adicionar despensa"/>
       </div>
       <FooterApp className={styles.footer}/>
     </Grid>
