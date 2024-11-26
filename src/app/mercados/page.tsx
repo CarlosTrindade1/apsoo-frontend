@@ -1,6 +1,6 @@
 'use client';
 
-import { Checkbox, Table, Tooltip } from 'flowbite-react';
+import { Button, Checkbox, Label, Modal, Table, TextInput } from 'flowbite-react';
 import FooterApp from '../components/footer';
 import Grid from '../components/grid';
 import Header from '../components/header';
@@ -13,6 +13,9 @@ import ButtonAdder from '../components/button-adder';
 
 export default function Mercados() {
   const [mercados, setMercados] = useState<IMercadoDTO[]>([]);
+  const [openModal, setOpenModal] = useState<boolean>(false);
+  const [mercado, setMercado] = useState<string>('');
+
 
   async function fetchMercados(): Promise<IMercadoDTO[]> {
     const response = await fetch(`${BACKEND_URL}/api/list-mercados`);
@@ -20,6 +23,29 @@ export default function Mercados() {
     const data: IMercadoDTO[] = await response.clone().json();
 
     return data;
+  }
+
+  async function addMercado(): Promise<void> {
+    if (!mercado) {
+      return;
+    }
+
+    const token = localStorage.getItem(process.env.NEXT_PUBLIC_TOKEN_KEY!)
+
+    console.log(token);
+
+    const response = await fetch(`${BACKEND_URL}/api/list-mercados`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ nome: mercado })
+    });
+
+    if (response.ok) {
+      console.log('Deu bom');
+    }
   }
 
   useEffect(() => {
@@ -70,7 +96,7 @@ export default function Mercados() {
                 <Table.Body className="divide-y">
                   {mercados.map((mercado) => {
                     return (
-                      <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
+                      <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800" key={mercado.id}>
                         <Table.Cell className="p-4">
                           <Checkbox />
                         </Table.Cell>
@@ -92,7 +118,23 @@ export default function Mercados() {
                   })}
                 </Table.Body>
               </Table>
-              <ButtonAdder content="Adicionar mercado"/>
+              <ButtonAdder content="Adicionar mercado" onClick={() => setOpenModal(true)}/>
+              <Modal show={openModal} onClose={() => setOpenModal(false)}>
+									<Modal.Header>Adicionar um produto</Modal.Header>
+									<Modal.Body>
+										<div className="flex max-w-md flex-col gap-4">
+											<div>
+												<div className="mb-2 block">
+													<Label htmlFor="small" value="Nome" />
+												</div>
+												<TextInput id="small" type="text" sizing="sm" onChange={(e) => setMercado(e.target.value)}/>
+											</div>
+										</div>
+									</Modal.Body>
+									<Modal.Footer>
+										<Button onClick={() => addMercado()}>Adicionar</Button>
+									</Modal.Footer>
+								</Modal>
             </div>
           )
         }
