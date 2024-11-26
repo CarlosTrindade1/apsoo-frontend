@@ -40,6 +40,7 @@ export default function Home() {
       router.push('/dashboard');
       
     } catch (e: any) {
+      console.log(e.message);
       setError(e.message);
     }
   }

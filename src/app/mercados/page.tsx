@@ -6,7 +6,6 @@ import Grid from '../components/grid';
 import Header from '../components/header';
 import { Navbar } from '../components/nav-bar';
 import styles from '../components/styles/Grid.module.css';
-import { BACKEND_URL } from '../constants';
 import { useEffect, useState } from 'react';
 import { IMercadoDTO } from '../despensas/interfaces/IDespensaDTO';
 import ButtonAdder from '../components/button-adder';
@@ -19,6 +18,8 @@ export default function Mercados() {
 
 
   async function fetchMercados(): Promise<IMercadoDTO[]> {
+    const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     const response = await fetch(`${BACKEND_URL}/api/list-mercados`);
 
     const data: IMercadoDTO[] = await response.clone().json();
@@ -27,21 +28,21 @@ export default function Mercados() {
   }
 
   async function addMercado(): Promise<void> {
-    if (!mercado || !process.env.NEXT_PUBLIC_TOKEN_PATH) {
+    if (!mercado || !process.env.NEXT_PUBLIC_TOKEN_PATH || !process.env.NEXT_PUBLIC_BACKEND_URL) {
       return;
     }
 
     const token = localStorage.getItem(process.env.NEXT_PUBLIC_TOKEN_PATH);
 
     try {
-      const response = await fetch(`${BACKEND_URL}/api/list-mercados`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/list-mercados`, {
         method: 'POST',
-        body: JSON.stringify({ nome: mercado }),
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ nome: mercado.nome }),
+      })
 
       if (!response.ok) {
         throw new Error('Erro ao cadastrar mercado.');
