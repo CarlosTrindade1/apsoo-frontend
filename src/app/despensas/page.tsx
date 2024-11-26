@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import { BACKEND_URL } from '../constants';
 import { IDespensaDTO, IDespensaItensDTO } from './interfaces/IDespensaDTO';
 import ButtonAdder from '../components/button-adder';
+import { useRouter } from 'next/navigation';
 
 type DataModal = {
   despensa: IDespensaDTO;
@@ -22,6 +23,7 @@ export default function Despensas() {
   const [openModal, setOpenModal] = useState(false);
   const [modalPlacement, setModalPlacement] = useState('center')
   const [dadosModal, setDadosModal] = useState<DataModal>();
+  const router = useRouter();
 
   async function fetchDespensas(): Promise<IDespensaDTO[]> {
     const response = await fetch(`${BACKEND_URL}/api/list-despensas`);
@@ -51,6 +53,17 @@ export default function Despensas() {
   }
 
   useEffect(() => {
+    if (!process.env.NEXT_PUBLIC_TOKEN_PATH) {
+      router.push('/');
+      return;
+    }
+
+    const token = localStorage.getItem(process.env.NEXT_PUBLIC_TOKEN_PATH);
+
+    if (!token) {
+      router.push('/');
+    }
+
     if (despensas.length === 0) {
       fetchDespensas().then((data) => {
         setDespensas(data);

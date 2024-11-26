@@ -27,16 +27,21 @@ export default function Home() {
       if (response.status !== 200) {
         throw new Error('Credenciais inválidas!');
       }
-
+      
       const data = await response.json();
 
-      localStorage.setItem('authToken', data.access);
-      localStorage.setItem('refreshToken', data.refresh);
+      if (!process.env.NEXT_PUBLIC_TOKEN_PATH) {
+        throw new Error('Falha ao criar token');
+      }
+
+      localStorage.setItem(process.env.NEXT_PUBLIC_TOKEN_PATH, data.access);
+      localStorage.setItem(process.env.NEXT_PUBLIC_TOKEN_PATH, data.refresh);
+
 
       router.push('/dashboard');
       
     } catch (e: any) {
-      setError(e);
+      setError(e.message);
     }
   }
 
