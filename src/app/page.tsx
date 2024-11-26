@@ -1,22 +1,60 @@
-import { Button, Checkbox, Flowbite, Label, TextInput } from 'flowbite-react';
+'use client';
+
+import { Button, Checkbox, Flowbite, Label, TextInput, Toast } from 'flowbite-react';
 import Link from 'next/link';
+import { useState } from 'react';
+import { BACKEND_URL } from './constants';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [error, setError] = useState<string>('');
+  const router = useRouter();
+
+  async function handleSubmit(e: React.ChangeEvent<HTMLInputElement>) {
+    e.preventDefault();
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      if (response.status !== 200) {
+        throw new Error('Credenciais inválidas!');
+      }
+
+      const data = await response.json();
+
+      localStorage.setItem('authToken', data.access);
+      localStorage.setItem('refreshToken', data.refresh);
+
+      router.push('/dashboard');
+      
+    } catch (e: any) {
+      setError(e);
+    }
+  }
+
   return (
     <Flowbite>
-      <div className="flex items-center justify-center h-screen dark:bg-gray-900">
+      <div className="flex items-center justify-center h-screen dark:bg-gray-900" onSubmit={handleSubmit}>
         <form className="flex max-w-md grow flex-col gap-4">
           <div>
             <div className="mb-2 block">
-              <Label htmlFor="email1" value="E-mail"/>
+              <Label htmlFor="email" value="E-mail"/>
             </div>
-            <TextInput id="email1" type="email" placeholder="name@email.com" required shadow/>
+            <TextInput id="email" type="email" name="email" placeholder="nome@email.com" required shadow onChange={(e) => setEmail(e.target.value)}/>
           </div>
           <div>
             <div className="mb-2 block">
-              <Label htmlFor="password1" value="Senha" />
+              <Label htmlFor="password" value="Senha" />
             </div>
-            <TextInput id="password1" type="password" required shadow/>
+            <TextInput id="password" name="password" type="password" required shadow onChange={(e) => setPassword(e.target.value)}/>
           </div>
           <div className="flex items-center gap-2">
             <Checkbox id="remember"/>
@@ -25,7 +63,6 @@ export default function Home() {
           <Button type="submit">Entrar</Button>
           <div className='flex items-center gap-2'>
             <Label>Não tem uma conta? <Link href="/signup" className='text-sky-700'>Cadastre-se</Link></Label>
-            <Label><Link href="/dashboard">Dashboard</Link></Label>
           </div>
         </form>
       </div>
