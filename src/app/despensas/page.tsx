@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Card, Dropdown, Modal, Table } from 'flowbite-react';
+import { Button, Card, Dropdown, Label, Modal, Table, TextInput } from 'flowbite-react';
 import FooterApp from '../components/footer';
 import Grid from '../components/grid';
 import Header from '../components/header';
@@ -23,6 +23,7 @@ export default function Despensas() {
   const [openModal, setOpenModal] = useState(false);
   const [modalPlacement, setModalPlacement] = useState('center')
   const [dadosModal, setDadosModal] = useState<DataModal>();
+  const [openCreateModal, setCreateModal] = useState(false);
   const router = useRouter();
 
   async function fetchDespensas(): Promise<IDespensaDTO[]> {
@@ -133,7 +134,7 @@ export default function Despensas() {
                     </div>
                     <div className="flex flex-col items-center pb-10">
                       <Image
-                        alt="Nome da Despensa"
+                        alt=""
                         height="96"
                         src="/static/despensa-01.jpg"
                         width="96"
@@ -198,6 +199,15 @@ export default function Despensas() {
           </Modal.Body>
           <Modal.Footer>
             <Button onClick={() => setOpenModal(false)}>Adicionar item</Button>
+          </Modal.Footer>
+        </Modal>
+        <Modal show={openCreateModal} onClose={() => setCreateModal(false)}>
+          <Modal.Header>Adicionar uma despensa</Modal.Header>
+          <Modal.Body>
+            
+          </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={true}>Salvar</Button>
           </Modal.Footer>
         </Modal>
       </div>
