@@ -14,7 +14,8 @@ import ButtonAdder from '../components/button-adder';
 export default function Mercados() {
   const [mercados, setMercados] = useState<IMercadoDTO[]>([]);
   const [openModal, setOpenModal] = useState<boolean>(false);
-  const [mercado, setMercado] = useState<string>('');
+  const [openEditModal, setOpenEditModal] = useState<boolean>(false);
+  const [mercado, setMercado] = useState<IMercadoDTO>({ id: 0, nome: '' });
 
 
   async function fetchMercados(): Promise<IMercadoDTO[]> {
@@ -26,25 +27,110 @@ export default function Mercados() {
   }
 
   async function addMercado(): Promise<void> {
-    if (!mercado) {
+    if (!mercado || !process.env.NEXT_PUBLIC_TOKEN_PATH) {
       return;
     }
 
-    const token = localStorage.getItem(process.env.NEXT_PUBLIC_TOKEN_KEY!)
+    const token = localStorage.getItem(process.env.NEXT_PUBLIC_TOKEN_PATH);
 
-    console.log(token);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/list-mercados`, {
+        method: 'POST',
+        body: JSON.stringify({ nome: mercado }),
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
 
-    const response = await fetch(`${BACKEND_URL}/api/list-mercados`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ nome: mercado })
-    });
+      if (!response.ok) {
+        throw new Error('Erro ao cadastrar mercado.');
+      }
 
-    if (response.ok) {
-      console.log('Deu bom');
+      const data = await response.json();
+
+      mercados.push({ id: data.id, nome: data.nome });
+
+      setMercados(mercados);
+      setOpenModal(false);
+      setMercado({ nome: '' });
+    } catch (e: any) {
+      console.log(e.message);
+    }
+  }
+
+  async function deleteMercado(mercadoID: number): Promise<void> {
+    if (!mercadoID) return;
+
+    try {
+      if (!process.env.NEXT_PUBLIC_BACKEND_URL || !process.env.NEXT_PUBLIC_TOKEN_PATH) {
+        throw new Error('Erro ao deletar mercado');
+      }
+
+      const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+      const token = localStorage.getItem(process.env.NEXT_PUBLIC_TOKEN_PATH);
+
+      console.log(token);
+
+      const response = await fetch(`${BACKEND_URL}/api/mercado/${mercadoID}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao deletar mercado');
+      }
+
+      const newMercados: IMercadoDTO[] = mercados.filter((mercado) => {
+        mercado.id !== mercadoID
+      });
+
+      setMercados(newMercados);
+    } catch (e: any) {
+      console.log(e.message);
+    }
+  }
+
+  async function handleEditMercado(mercado: IMercadoDTO) {
+    setMercado(mercado);
+    setOpenEditModal(true);
+  }
+
+  async function editMercado(): Promise<void> {
+    if (!process.env.NEXT_PUBLIC_TOKEN_PATH || !process.env.NEXT_PUBLIC_BACKEND_URL) {
+      throw new Error('Erro ao salvar modificações');
+    }
+
+    const token = localStorage.getItem(process.env.NEXT_PUBLIC_TOKEN_PATH);
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/mercado/${mercado.id}`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ nome: mercado.nome })
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Erro ao salvar modificações');
+      }
+      
+      mercados.map((mercadoItem) => {
+        mercadoItem.id === mercado.id ? mercadoItem.nome = mercado.nome : mercadoItem
+      })
+
+      setMercados(mercados);
+
+      setOpenEditModal(false);
+
+    } catch (e: any) {
+      console.log(e.message);
     }
   }
 
@@ -104,12 +190,12 @@ export default function Mercados() {
                           {mercado.nome}
                         </Table.Cell>
                         <Table.Cell>
-                          <a href="#" className="font-medium text-cyan-600 hover:underline dark:text-cyan-500">
+                          <a onClick={() => handleEditMercado(mercado)} className="font-medium text-cyan-600 hover:underline dark:text-cyan-500">
                             Editar
                           </a>
                         </Table.Cell>
                         <Table.Cell>
-                          <a href="#" className="font-medium text-red-600 hover:underline dark:text-cyan-500">
+                          <a onClick={() => deleteMercado(mercado.id!)} className="font-medium text-red-600 hover:underline dark:text-cyan-500">
                             Excluir
                           </a>
                         </Table.Cell>
@@ -127,12 +213,31 @@ export default function Mercados() {
 												<div className="mb-2 block">
 													<Label htmlFor="small" value="Nome" />
 												</div>
-												<TextInput id="small" type="text" sizing="sm" onChange={(e) => setMercado(e.target.value)}/>
+												<TextInput id="small" type="text" sizing="sm" onChange={(e) => setMercado({ nome: e.target.value })}/>
 											</div>
 										</div>
 									</Modal.Body>
 									<Modal.Footer>
 										<Button onClick={() => addMercado()}>Adicionar</Button>
+									</Modal.Footer>
+								</Modal>
+                <Modal show={openEditModal} onClose={() => setOpenEditModal(false)}>
+									<Modal.Header>Editar um produto</Modal.Header>
+									<Modal.Body>
+										<div className="flex max-w-md flex-col gap-4">
+											<div>
+												<div className="mb-2 block">
+													<Label htmlFor="small" value="Nome" />
+												</div>
+												<TextInput id="small" value={mercado.nome} type="text" sizing="sm" onChange={(e) => setMercado({
+                          id: mercado.id,
+                          nome: e.target.value
+                        })}/>
+											</div>
+										</div>
+									</Modal.Body>
+									<Modal.Footer>
+										<Button onClick={() => editMercado()}>Salvar</Button>
 									</Modal.Footer>
 								</Modal>
             </div>

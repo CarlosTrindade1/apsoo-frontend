@@ -30,12 +30,12 @@ export default function Home() {
       
       const data = await response.json();
 
-      if (!process.env.NEXT_PUBLIC_TOKEN_PATH) {
+      if (!process.env.NEXT_PUBLIC_TOKEN_PATH || !process.env.NEXT_PUBLIC_REFRESH_TOKEN) {
         throw new Error('Falha ao criar token');
       }
 
       localStorage.setItem(process.env.NEXT_PUBLIC_TOKEN_PATH, data.access);
-      localStorage.setItem(process.env.NEXT_PUBLIC_TOKEN_PATH, data.refresh);
+      localStorage.setItem(process.env.NEXT_PUBLIC_REFRESH_TOKEN, data.refresh);
 
       router.push('/dashboard');
       

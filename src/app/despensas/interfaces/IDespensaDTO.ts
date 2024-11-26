@@ -17,7 +17,7 @@ export interface IProdutoDTO {
 }
 
 export interface IMercadoDTO {
-    id: number;
+    id?: number;
     nome: string;
 }
 
