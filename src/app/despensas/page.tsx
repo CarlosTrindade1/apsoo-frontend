@@ -69,7 +69,7 @@ export default function Despensas() {
         setDespensas(data);
       });
     }
-  }, [despensas]);
+  }, [despensas, router]);
 
   return (
     <Grid>
@@ -110,7 +110,7 @@ export default function Despensas() {
             <div className="flex flex-wrap gap-8">
               {despensas.map((despensa: IDespensaDTO) => {
                 return (
-                  <Card className="max-w-sm">
+                  <Card className="max-w-sm" key={despensa.id}>
                     <div className="flex justify-end px-4 pt-4">
                       <Dropdown inline label="">
                         <Dropdown.Item>
@@ -178,7 +178,7 @@ export default function Despensas() {
               <Table.Body className="divide-y">
                 {dadosModal?.itens.item_set.map((item) => {
                   return (
-                    <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
+                    <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800" key={item.id}>
                       <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
                         {item.produto.nome}
                       </Table.Cell>

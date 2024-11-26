@@ -37,7 +37,6 @@ export default function Home() {
       localStorage.setItem(process.env.NEXT_PUBLIC_TOKEN_PATH, data.access);
       localStorage.setItem(process.env.NEXT_PUBLIC_TOKEN_PATH, data.refresh);
 
-
       router.push('/dashboard');
       
     } catch (e: any) {
