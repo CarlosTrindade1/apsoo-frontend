@@ -221,26 +221,26 @@ export default function Mercados() {
 									<Modal.Footer>
 										<Button onClick={() => addMercado()}>Adicionar</Button>
 									</Modal.Footer>
-								</Modal>
-                <Modal show={openEditModal} onClose={() => setOpenEditModal(false)}>
-									<Modal.Header>Editar um produto</Modal.Header>
-									<Modal.Body>
-										<div className="flex max-w-md flex-col gap-4">
-											<div>
-												<div className="mb-2 block">
-													<Label htmlFor="small" value="Nome" />
-												</div>
-												<TextInput id="small" value={mercado.nome} type="text" sizing="sm" onChange={(e) => setMercado({
-                          id: mercado.id,
-                          nome: e.target.value
-                        })}/>
-											</div>
-										</div>
-									</Modal.Body>
-									<Modal.Footer>
-										<Button onClick={() => editMercado()}>Salvar</Button>
-									</Modal.Footer>
-								</Modal>
+              </Modal>
+              <Modal show={openEditModal} onClose={() => setOpenEditModal(false)}>
+                <Modal.Header>Editar um produto</Modal.Header>
+                <Modal.Body>
+                  <div className="flex max-w-md flex-col gap-4">
+                    <div>
+                      <div className="mb-2 block">
+                        <Label htmlFor="small" value="Nome" />
+                      </div>
+                      <TextInput id="small" value={mercado.nome} type="text" sizing="sm" onChange={(e) => setMercado({
+                        id: mercado.id,
+                        nome: e.target.value
+                      })}/>
+                    </div>
+                  </div>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button onClick={() => editMercado()}>Salvar</Button>
+                </Modal.Footer>
+              </Modal>
             </div>
           )
         }

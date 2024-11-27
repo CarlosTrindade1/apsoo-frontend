@@ -1,29 +1,81 @@
 'use client';
 
-import { Button, Card, Dropdown, Label, Modal, Table, TextInput } from 'flowbite-react';
+import { Button, Card, Checkbox, Dropdown, Label, Modal, Select, Table, TextInput } from 'flowbite-react';
 import FooterApp from '../components/footer';
 import Grid from '../components/grid';
 import Header from '../components/header';
 import { Navbar } from '../components/nav-bar';
 import styles from '../components/styles/Grid.module.css';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { BACKEND_URL } from '../constants';
-import { IDespensaDTO, IDespensaItensDTO } from './interfaces/IDespensaDTO';
-import ButtonAdder from '../components/button-adder';
+import { ICategoriaDTO, IDespensaDTO, IDespensaItensDTO, IMercadoDTO, IProdutoDTO } from './interfaces/IDespensaDTO';
 import { useRouter } from 'next/navigation';
+import ButtonAdder from '../components/button-adder';
 
 type DataModal = {
   despensa: IDespensaDTO;
   itens: IDespensaItensDTO;
 }
 
+type item = {
+  id: number;
+  produto: IProdutoDTO;
+  data_vencimento: string;
+  data_compra: string;
+  preco: number;
+  consumido: boolean;
+  mercado: IMercadoDTO;
+  comprador: string;
+  despensa: number;
+}
+
+type DadosModalItem = {
+  despensa: IDespensaDTO,
+  item: item
+}
+
 export default function Despensas() {
   const [despensas, setDespensas] = useState<IDespensaDTO[]>([]);
   const [openModal, setOpenModal] = useState(false);
   const [modalPlacement, setModalPlacement] = useState('center')
-  const [dadosModal, setDadosModal] = useState<DataModal>();
-  const [openCreateModal, setCreateModal] = useState(false);
+  const [dadosModal, setDadosModal] = useState<DataModal | null>(null);
+  const [openModalItem, setOpenModalItem] = useState<boolean>(false);
+  const [mercados, setMercados] = useState<IMercadoDTO[]>([]);
+  const [produtos, setProdutos] = useState<IProdutoDTO[]>([]);
+  const [dadosModalItem, setDadosModalItem] = useState<DadosModalItem>({
+    despensa: {
+      categorias: [],
+      descricao: '',
+      id: 0
+    },
+    item: {
+      id: 0,
+      comprador: '',
+      consumido: false,
+      data_compra: '',
+      data_vencimento: '',
+      despensa: 0,
+      mercado: {
+        nome: ''
+      },
+      preco: 0,
+      produto: {
+        id: 0,
+        categoria: {
+          id: 0,
+          nome: ''
+        },
+        nome: '',
+        prior: ''
+      }
+    }
+  });
+  const [addDespensaModal, setAddDespensaModal] = useState<boolean>(false);
+  const [categorias, setCategorias] = useState<ICategoriaDTO[]>([]);
+  const [nomeDespensa, setNomeDespensa] = useState<string>('');
+  const [categoriasDespensa, setCategoriasDespensa] = useState<number>(0);
+  
   const router = useRouter();
 
   async function fetchDespensas(): Promise<IDespensaDTO[]> {
@@ -42,6 +94,36 @@ export default function Despensas() {
     return data;
   }
 
+  async function fetchMercados(): Promise<IMercadoDTO[]> {
+    const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+    const response = await fetch(`${BACKEND_URL}/api/list-mercados`);
+
+    const data: IMercadoDTO[] = await response.clone().json();
+
+    return data;
+  }
+
+  async function fetchProdutos(): Promise<IProdutoDTO[]> {
+    const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+    const response = await fetch(`${BACKEND_URL}/api/list-produtos`);
+
+    const data: IProdutoDTO[] = await response.clone().json();
+
+    return data;
+  }
+
+  async function fetchCategorias(): Promise<ICategoriaDTO[]> {
+    const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+    const response = await fetch(`${BACKEND_URL}/api/list-categorias`);
+
+    const data: ICategoriaDTO[] = await response.clone().json();
+
+    return data;
+  }
+
   function setModal(despensa: IDespensaDTO) {
     fetchItensDespensa(despensa).then((data) => {
       setDadosModal({
@@ -51,6 +133,125 @@ export default function Despensas() {
     });
     setModalPlacement('center');
     setOpenModal(true);
+  }
+
+  function handleModal(dados: { despensa: IDespensaDTO, item: item }) {
+    setDadosModalItem(dados);
+    fetchMercados().then((data) => {
+      setMercados(data);
+    });
+    fetchProdutos().then((data) => setProdutos(data));
+    setOpenModalItem(true);
+  }
+
+  function handleModalAddDespensa() {
+    fetchCategorias().then((data) => setCategorias(data));
+    setAddDespensaModal(true);
+  }
+
+  async function handleEditItem(): Promise<void> {
+    if (!dadosModalItem.item.id) return;
+
+    try {
+      if (!process.env.NEXT_PUBLIC_BACKEND_URL || !process.env.NEXT_PUBLIC_TOKEN_PATH) {
+        throw new Error('Erro ao editar item');
+      }
+
+      const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+      const token = localStorage.getItem(process.env.NEXT_PUBLIC_TOKEN_PATH);
+
+      console.log(dadosModalItem.item.mercado.id);
+
+      const response = await fetch(`${BACKEND_URL}/api/item/${dadosModalItem.item.id}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          produto_id: dadosModalItem.item.produto.id,
+          mercado_id: dadosModalItem.item.mercado.id,
+          data_vencimento: dadosModalItem.item.data_vencimento,
+          data_compra: dadosModalItem.item.data_compra,
+          preco: dadosModalItem.item.preco,
+          consumido: dadosModalItem.item.consumido,
+          despensa: dadosModalItem.item.despensa,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao editar item.');
+      }
+
+      const data = await response.json();
+
+      if (!dadosModal) return;
+
+      const index = dadosModal.itens.item_set.findIndex((item) => item.id === data.id);
+
+      dadosModal.itens.item_set[index] = data;
+
+      setDadosModal({
+        ...dadosModal,
+        itens: dadosModal.itens
+      });
+
+      setOpenModalItem(false);
+    } catch (e: any) {
+      console.log(e.message);
+    }
+  }
+
+  async function handleAddDespensa(): Promise<void> {
+    console.log(categoriasDespensa);
+
+    if (!nomeDespensa || !categoriasDespensa || !process.env.NEXT_PUBLIC_BACKEND_URL || !process.env.NEXT_PUBLIC_TOKEN_PATH) {
+      return;
+    }
+
+    const token = localStorage.getItem(process.env.NEXT_PUBLIC_TOKEN_PATH);
+
+    console.log({
+      "categorias_ids": categoriasDespensa,
+      "quantidadepadrao_set_ids": [
+        1
+      ],
+      "descricao": nomeDespensa,
+      "gerente": 1
+    });
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/list-despensas`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          "categorias_ids": [categoriasDespensa],
+          "quantidadepadrao_set_ids": [
+            1
+          ],
+          "descricao": nomeDespensa,
+          "gerente": 1
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao cadastrar despensa.');
+      }
+
+      const data = await response.json();
+
+      despensas.push({ id: data.id, descricao: data.descricao, categorias: data.categorias });
+
+      setDespensas(despensas);
+      setAddDespensaModal(false);
+      setNomeDespensa('');
+      setCategoriasDespensa(0);
+    } catch (e: any) {
+      console.log(e.message);
+    }
   }
 
   useEffect(() => {
@@ -155,7 +356,7 @@ export default function Despensas() {
                   </Card>
                 )
               })}
-              <ButtonAdder content="Adicionar despensa"/>
+              <ButtonAdder content='Adicionar despensa' onClick={() => handleModalAddDespensa()}/>
             </div>
           )
         }
@@ -187,7 +388,7 @@ export default function Despensas() {
                       <Table.Cell>{item.data_vencimento}</Table.Cell>
                       <Table.Cell>R$ {item.preco}</Table.Cell>
                       <Table.Cell>
-                        <a href="#" className="font-medium text-cyan-600 hover:underline dark:text-cyan-500">
+                        <a onClick={() => handleModal({ despensa: dadosModal!.despensa, item: item })} className="font-medium text-cyan-600 hover:underline dark:text-cyan-500">
                           Editar
                         </a>
                       </Table.Cell>
@@ -198,16 +399,147 @@ export default function Despensas() {
             </Table>
           </Modal.Body>
           <Modal.Footer>
-            <Button onClick={() => setOpenModal(false)}>Adicionar item</Button>
+            <Button>Adicionar item</Button>
           </Modal.Footer>
         </Modal>
-        <Modal show={openCreateModal} onClose={() => setCreateModal(false)}>
-          <Modal.Header>Adicionar uma despensa</Modal.Header>
+        <Modal
+          show={openModalItem}
+          position={modalPlacement}
+          onClose={() => setOpenModalItem(false)}
+        >
+          <Modal.Header>Editando item</Modal.Header>
           <Modal.Body>
-            
+            <div className="flex max-w-md flex-col gap-4">
+              <div>
+                <div className="mb-2 block">
+                  <Label htmlFor="preco" value="Preço"/>
+                </div>
+                <TextInput id="preco" type="number" step="0.01" required value={dadosModalItem.item.preco} onChange={(e) => {
+                  setDadosModalItem({
+                    ...dadosModalItem,
+                    item: {
+                      ...dadosModalItem.item,
+                      preco: parseFloat(e.target.value)
+                    }
+                  })
+                }}/>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox id="consumido" checked={dadosModalItem.item.consumido} onChange={(e) => {
+                  setDadosModalItem({
+                    ...dadosModalItem,
+                    item: {
+                      ...dadosModalItem.item,
+                      consumido: e.target.checked
+                    }
+                  })
+                }}/>
+                <Label htmlFor="consumido">Consumido?</Label>
+              </div>
+              <div className="max-w-md">
+                <div className="mb-2 block">
+                  <Label htmlFor="produtos" value="Produto"/>
+                </div>
+                <Select id="produtos" required value={dadosModalItem.item.produto.nome} onChange={(e) => {
+                  setDadosModalItem({
+                    ...dadosModalItem,
+                    item: {
+                      ...dadosModalItem.item,
+                      produto: {
+                        ...dadosModalItem.item.produto,
+                        nome: e.target.value
+                      }
+                    }
+                  })
+                }}>
+                  {
+                    produtos.map((produto) => {
+                      return (
+                        <option key={produto.id} value={produto.nome}>{produto.nome}</option>
+                      )
+                    })
+                  }
+                </Select>
+              </div>
+              <div className="max-w-md">
+                <div className="mb-2 block">
+                  <Label htmlFor="mercados" value="Mercado"/>
+                </div>
+                <Select id="mercados" required value={dadosModalItem.item.mercado.nome} onChange={(e) => {
+                  setDadosModalItem({
+                    ...dadosModalItem,
+                    item: {
+                      ...dadosModalItem.item,
+                      mercado: {
+                        id: dadosModalItem.item.mercado.id,
+                        nome: e.target.value
+                      }
+                    }
+                  })
+                }}>
+                  {
+                    mercados.map((mercado) => {
+                      return (
+                        <option key={mercado.id} value={mercado.nome}>{mercado.nome}</option>
+                      )
+                    })
+                  }
+                </Select>
+              </div>
+              <div className="max-w-md">
+                <div className="mb-2 block">
+                  <Label htmlFor="compradores" value="Comprador"/>
+                </div>
+                <Select id="compradores" required value={dadosModalItem.item.comprador} onChange={(e) => {
+                  setDadosModalItem({
+                    ...dadosModalItem,
+                    item: {
+                      ...dadosModalItem.item,
+                      comprador: e.target.value
+                    }
+                  })
+                }}>
+                  <option>{dadosModalItem.item.comprador}</option>
+                </Select>
+              </div>
+            </div>
           </Modal.Body>
           <Modal.Footer>
-            <Button onClick={true}>Salvar</Button>
+            <Button onClick={() => handleEditItem()}>Salvar</Button>
+          </Modal.Footer>
+        </Modal>
+        <Modal
+          show={addDespensaModal}
+          position={modalPlacement}
+          onClose={() => setAddDespensaModal(false)}
+        >
+          <Modal.Header>Criando despensa</Modal.Header>
+          <Modal.Body>
+            <div className="flex max-w-md flex-col gap-4">
+              <div>
+                <div className="mb-2 block">
+                  <Label htmlFor="descricao" value="Nome"/>
+                </div>
+                <TextInput id="descricao" type="text" required onChange={(e) => setNomeDespensa(e.target.value)}/>
+              </div>
+              <div className="max-w-md">
+                <div className="mb-2 block">
+                  <Label htmlFor="categorias" value="Categoria"/>
+                </div>
+                <Select id="categorias" value={categoriasDespensa} required onChange={(e) => { setCategoriasDespensa(parseInt(e.target.value))}}>
+                  {
+                    categorias.map((categoria) => {
+                      return (
+                        <option key={categoria.id} value={categoria.id}>{categoria.nome}</option>
+                      )
+                    })
+                  }
+                </Select>
+              </div>
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={() => handleAddDespensa()}>Salvar</Button>
           </Modal.Footer>
         </Modal>
       </div>
