@@ -7,7 +7,7 @@ import Header from '../components/header';
 import { Navbar } from '../components/nav-bar';
 import styles from '../components/styles/Grid.module.css';
 import Image from 'next/image';
-import { use, useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import { BACKEND_URL } from '../constants';
 import { ICategoriaDTO, IDespensaDTO, IDespensaItensDTO, IMercadoDTO, IProdutoDTO } from './interfaces/IDespensaDTO';
 import { useRouter } from 'next/navigation';
@@ -71,10 +71,19 @@ export default function Despensas() {
       }
     }
   });
+
   const [addDespensaModal, setAddDespensaModal] = useState<boolean>(false);
   const [categorias, setCategorias] = useState<ICategoriaDTO[]>([]);
   const [nomeDespensa, setNomeDespensa] = useState<string>('');
   const [categoriasDespensa, setCategoriasDespensa] = useState<number>(0);
+  const [addItemModal, setAddItemModal] = useState<boolean>(false);
+  
+  const [dataVencimento, setDataVencimento] = useState<string>();
+  const [dataCompra, setDataCompra] = useState<string>();
+  const [preco, setPreco] = useState<number>();
+  const [consumido, setConsumido] = useState<boolean>(false);
+  const [produto, setProduto] = useState<number | null>(null);
+  const [mercado, setMercado] = useState<number | null>(null);
   
   const router = useRouter();
 
@@ -254,6 +263,89 @@ export default function Despensas() {
     }
   }
 
+  async function handleAddItem(): Promise<void> {
+    if (!dataVencimento || !dataCompra || !preco || !produto || !mercado || !process.env.NEXT_PUBLIC_BACKEND_URL || !process.env.NEXT_PUBLIC_TOKEN_PATH) {
+      return;
+    }
+
+    const token = localStorage.getItem(process.env.NEXT_PUBLIC_TOKEN_PATH);
+
+    console.log({
+      data_vencimento: dataVencimento,
+      data_compra: dataCompra,
+      preco: preco,
+      consumido: consumido,
+      produto_id: produto,
+      mercado_id: mercado,
+      despensa: dadosModal?.despensa.id
+    });
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/list-itens`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          data_vencimento: dataVencimento,
+          data_compra: dataCompra,
+          preco: preco,
+          consumido: consumido,
+          produto_id: produto,
+          mercado_id: mercado,
+          comprador: 1,
+          despensa: dadosModal?.despensa.id
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao cadastrar item.');
+      }
+
+      const data = await response.json();
+
+      if (!dadosModal) return;
+
+      dadosModal.itens.item_set.push(data);
+
+      setDadosModal({
+        ...dadosModal,
+        itens: dadosModal.itens
+      });
+
+      setAddItemModal(false);
+    } catch (e: any) {
+      console.log(e.message);
+    }
+  }
+
+  function handleModalAddItem() {
+    fetchProdutos().then((data) => setProdutos(data));
+    fetchMercados().then((data) => setMercados(data));
+    setAddItemModal(true);
+  }
+
+  function handleDataVencimento(e: React.ChangeEvent<HTMLInputElement>) {
+    const valorData = e.target.value;
+
+    if (!valorData) return;
+
+    const [ano, mes, dia] = valorData.split('-').map(Number);
+
+    setDataVencimento(new Date(ano, mes, dia).toISOString());
+  }
+
+  function handleDataCompra(e: React.ChangeEvent<HTMLInputElement>) {
+    const valorData = e.target.value;
+
+    if (!valorData) return;
+
+    const [ano, mes, dia] = valorData.split('-').map(Number);
+
+    setDataCompra(new Date(ano, mes, dia).toISOString());
+  }
+
   useEffect(() => {
     if (!process.env.NEXT_PUBLIC_TOKEN_PATH) {
       router.push('/');
@@ -399,7 +491,7 @@ export default function Despensas() {
             </Table>
           </Modal.Body>
           <Modal.Footer>
-            <Button>Adicionar item</Button>
+            <Button onClick={() => handleModalAddItem()}>Adicionar item</Button>
           </Modal.Footer>
         </Modal>
         <Modal
@@ -540,6 +632,72 @@ export default function Despensas() {
           </Modal.Body>
           <Modal.Footer>
             <Button onClick={() => handleAddDespensa()}>Salvar</Button>
+          </Modal.Footer>
+        </Modal>
+        <Modal
+          show={addItemModal}
+          position={modalPlacement}
+          onClose={() => setAddItemModal(false)}
+        >
+          <Modal.Header>Adicionando item</Modal.Header>
+          <Modal.Body>
+          <div className="flex max-w-md flex-col gap-4">
+              <div>
+                <div className="mb-2 block">
+                    <Label htmlFor="dataVencimento" value="Data de vencimento"/>
+                </div>
+                <TextInput id="dataVencimento" type="date" required onChange={(e) => handleDataVencimento(e)}/>
+              </div>
+              <div>
+                <div className="mb-2 block">
+                    <Label htmlFor="dataCompra" value="Data de compra"/>
+                </div>
+                <TextInput id="dataCompra" type="date" required onChange={(e) => handleDataCompra(e)}/>
+              </div>
+              <div>
+                <div className="mb-2 block">
+                  <Label htmlFor="preco" value="Preço"/>
+                </div>
+                <TextInput id="preco" type="number" step="0.01" required onChange={(e) => setPreco(parseFloat(e.target.value))}/>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox id="consumido" onChange={(e) => setConsumido(e.target.checked)}/>
+                <Label htmlFor="consumido">Consumido?</Label>
+              </div>
+              <div className="max-w-md">
+                <div className="mb-2 block">
+                  <Label htmlFor="produtos" value="Produto"/>
+                </div>
+                <Select id="produtos" required onChange={(e) => setProduto(parseInt(e.target.value))}>
+                  <option value=""></option>
+                  {
+                    produtos.map((produto) => {
+                      return (
+                        <option key={produto.id} value={produto.id}>{produto.nome}</option>
+                      )
+                    })
+                  }
+                </Select>
+              </div>
+              <div className="max-w-md">
+                <div className="mb-2 block">
+                  <Label htmlFor="mercados" value="Mercado"/>
+                </div>
+                <Select id="mercados" required onChange={(e) => setMercado(parseInt(e.target.value))}>
+                  <option value=""></option>
+                  {
+                    mercados.map((mercado) => {
+                      return (
+                        <option key={mercado.id} value={mercado.id}>{mercado.nome}</option>
+                      )
+                    })
+                  }
+                </Select>
+              </div>
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={handleAddItem}>Salvar</Button>
           </Modal.Footer>
         </Modal>
       </div>

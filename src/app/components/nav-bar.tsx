@@ -40,6 +40,9 @@ export function Navbar(props: NavbarProps) {
               <Sidebar.Item href="/produtos" className={`${route == 'produtos' ? 'bg-gray-100 dark:bg-gray-700' : ''}`} icon={BiFoodMenu}>
                 Produtos
               </Sidebar.Item>
+              <Sidebar.Item href="http://localhost:8000/admin" className={`${route == 'produtos' ? 'bg-gray-100 dark:bg-gray-700' : ''}`} icon={BiFoodMenu}>
+                Admin
+              </Sidebar.Item>
               <Sidebar.Item href="/" icon={IoLogOutOutline}>
                 Sair
               </Sidebar.Item>
