@@ -25,7 +25,7 @@ export function Navbar(props: NavbarProps) {
       <Flowbite>
         <Sidebar theme={customTheme} className='fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0'>
           <Sidebar.Logo href="/dashboard" img='' >
-            Nome do app
+            Pantry Manager
           </Sidebar.Logo>
           <Sidebar.Items>
             <Sidebar.ItemGroup>

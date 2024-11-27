@@ -7,10 +7,10 @@ export default function FooterApp({ className }: {  className?: string }) {
         <div className="w-full text-center">
           <div className="w-full justify-between sm:flex sm:items-center sm:justify-between">
             <Footer.Brand
-              href="https://flowbite.com"
+              href="/dashboard"
               src="https://flowbite.com/docs/images/logo.svg"
               alt="Flowbite Logo"
-              name="Nome do app"
+              name="Pantry Manager"
             />
             <Footer.LinkGroup>
               <Footer.Link href="#">Sobre</Footer.Link>

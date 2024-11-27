@@ -619,6 +619,7 @@ export default function Despensas() {
                   <Label htmlFor="categorias" value="Categoria"/>
                 </div>
                 <Select id="categorias" value={categoriasDespensa} required onChange={(e) => { setCategoriasDespensa(parseInt(e.target.value))}}>
+                  <option value=""></option>
                   {
                     categorias.map((categoria) => {
                       return (
